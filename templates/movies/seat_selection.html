@@ -1,0 +1,127 @@
+{% extends "users/basic.html" %}
+{% block content %}
+<h2 class="text-center mt-4">Seat Selection</h2>
+
+<div class="container">
+    <div class="screen">Screen This Side</div>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <div class="seat-grid">
+            {% for seat in seats %}
+            <div class="seat {% if seat.is_booked %}sold{% endif %}">
+                {% if not seat.is_booked %}
+                <input 
+                    type="checkbox" 
+                    name="seats"
+                    value="{{ seat.id }}" 
+                    class="d-none seat-checkbox" 
+                    data-price="{{ seat.calculate_dynamic_price }}" 
+                    id="seat-{{ seat.id }}"
+                />
+                <label 
+                    for="seat-{{ seat.id }}" 
+                    class="seat-label"
+                >{{ seat.seat_number }}</label>
+                {% else %}
+                <span class="sold-seat">{{ seat.seat_number }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-3">
+            <p><strong>Total Price:</strong> ₹ <span id="total-price">0.00</span></p> <!-- Fixed this -->
+            <button type="submit" class="btn btn-success btn-lg">Book Selected Seats</button>
+        </div>
+    </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const seatCheckboxes = document.querySelectorAll(".seat-checkbox");
+    const totalPriceElement = document.getElementById("total-price");
+
+    let totalPrice = 0;
+
+    seatCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener("change", function () {
+        let seatDiv = this.closest(".seat");
+        let seatPrice = parseFloat(this.getAttribute("data-price"));
+
+        if (this.checked) {
+          seatDiv.classList.add("selected");
+          totalPrice += seatPrice;
+        } else {
+          seatDiv.classList.remove("selected");
+          totalPrice -= seatPrice;
+        }
+
+        totalPriceElement.textContent = totalPrice.toFixed(2);
+      });
+    });
+  });
+
+
+  var theaterId = "{{ theater.id }}";
+  var ws = new WebSocket(`ws://${window.location.host}/ws/seats/`);
+
+  ws.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      console.log("🔄 Real-time Seat Update:", data);
+
+      data.seat_numbers.forEach(seatNumber => {
+          var seatElement = document.querySelector(`[data-seat-number="${seatNumber}"]`);
+          if (seatElement) {
+              seatElement.classList.add("sold");
+              seatElement.innerHTML = "Booked";
+          }
+      });
+  };
+</script>
+
+<style>
+  .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+  }
+
+  .seat {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #28a745;
+      text-align: center;
+      line-height: 40px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+  }
+
+  .seat:hover {
+      background-color: #28a745;
+      color: white;
+  }
+
+  .seat.selected {
+      background-color: #28a745 !important;
+      color: white;
+  }
+
+  .seat.sold {
+      background-color: #ccc;
+      cursor: not-allowed;
+  }
+
+  .screen {
+      margin: 20px 0;
+      background-color: #ccc;
+      height: 50px;
+      text-align: center;
+      line-height: 50px;
+      color: #666;
+  }
+</style>
+
+{% endblock %}

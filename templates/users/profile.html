@@ -1,0 +1,205 @@
+{% extends "users/basic.html" %} 
+{% block content %}
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-4 mb-4">
+      <!-- User Info Card -->
+      <div class="card shadow">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-user-circle fa-6x text-primary"></i>
+          </div>
+          <h3 class="card-title mb-0">{{ user.username }}</h3>
+          <p class="text-muted mb-3">{{ user.email }}</p>
+          <div class="d-flex justify-content-center">
+            <a href="#" class="btn btn-outline-primary me-2"><i class="fas fa-envelope me-2"></i>Message</a> 
+            <a href="{% url 'password_reset' %}" class="btn btn-outline-secondary"><i class="fas fa-key me-2"></i>Reset Password</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-8">
+      <!-- Profile Update Form Card -->
+<div class="card shadow mb-4 profile-form-container">
+  <div class="card-header bg-primary text-white">
+      <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i> Update Profile</h4>
+  </div>
+  <div class="card-body">
+      <form method="POST">
+          {% csrf_token %}
+          {% for field in u_form %}
+              <div class="mb-3">
+                  <label for="{{ field.id_for_label }}" class="form-label">
+                      <i class="fas fa-{% if field.name == 'username' %}user{% elif field.name == 'email' %}envelope{% else %}info-circle{% endif %} me-2"></i>
+                      {{ field.label }}
+                  </label>
+                  {{ field.errors }}
+                  {{ field }}
+                  {% if field.help_text %}
+                      <small class="form-text text-muted">{{ field.help_text }}</small>
+                  {% endif %}
+              </div>
+          {% endfor %}
+          <button class="btn btn-update-profile" type="submit">
+              <i class="fas fa-save me-2"></i> Update Profile
+          </button>
+      </form>
+  </div>
+</div>
+
+      
+      <!-- Bookings Card -->
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0"><i class="fas fa-ticket-alt me-2"> </i> Your Bookings</h4>
+        </div>
+        <div class="card-body">
+          
+          <!-- Upcoming Bookings -->
+          <h5 class="text-primary">Upcoming Bookings</h5>
+          {% if upcoming_bookings %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+              {% for booking in upcoming_bookings %}
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ booking.movie.name }}</h5>
+                      <p class="card-text">
+                        <i class="fas fa-film me-2 text-muted"></i> {{ booking.theater.name }}<br>
+                        <i class="fas fa-chair me-2 text-muted"></i> Seat: {{ booking.seat.seat_number }}<br>
+                        <i class="far fa-calendar-alt me-2 text-muted"></i> Booking Date: {{ booking.show_date|date:"F d, Y" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-center text-muted">No upcoming bookings.</p>
+          {% endif %}
+
+          <!-- Past Bookings -->
+          <hr>
+          <h5 class="text-danger">Past Bookings</h5>
+          {% if past_bookings %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+              {% for booking in past_bookings %}
+                <div class="col">
+                  <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ booking.movie.name }}</h5>
+                      <p class="card-text">
+                        <i class="fas fa-film me-2 text-muted"></i> {{ booking.theater.name }}<br>
+                        <i class="fas fa-chair me-2 text-muted"></i> Seat: {{ booking.seat.seat_number }}<br>
+                        <i class="far fa-calendar-alt me-2 text-muted"></i> Booking Date: {{ booking.show_date|date:"F d, Y" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-center text-muted">No past bookings.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Custom CSS -->
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+  .card {
+    border-radius: 15px;
+    border: none;
+    transition: transform 0.3s ease-in-out;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+  }
+  .text-primary { color: #007bff; }
+  .text-danger { color: #dc3545; }
+
+  /* Profile Update Form */
+.profile-form-container {
+  background-color: #ffffff;
+  border: 2px solid #007bff;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+  transition: transform 0.3s ease-in-out;
+}
+
+.profile-form-container:hover {
+  transform: translateY(-3px);
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: #007bff;
+  background-color: #e9f5ff;
+  outline: none;
+}
+
+.form-error {
+  color: #dc3545;
+  font-weight: 500;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 8px 10px;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.btn-update-profile {
+  background-color: #007bff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  width: 100%;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btn-update-profile:hover {
+  background-color: #0056b3;
+  cursor: pointer;
+}
+
+  
+</style>
+
+{% endblock %}

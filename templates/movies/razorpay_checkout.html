@@ -1,0 +1,38 @@
+{% extends "users/basic.html" %}
+{% block content %}
+<h2 class="text-center mt-4">Complete Your Payment</h2>
+
+<div class="container text-center">
+    <p><strong>Movie:</strong> {{ booking.movie.name }}</p>
+    <p><strong>Theater:</strong> {{ booking.theater.name }}</p>
+    <p><strong>Seats:</strong> {{ booking.seat.seat_number }}</p>
+    <p><strong>Total Price:</strong> ₹{{ amount }}</p>
+
+    <!-- ✅ Payment Button -->
+    <button id="payWithRazorpay" class="btn btn-success btn-lg">Pay with Razorpay</button>
+</div>
+
+<!-- ✅ Include Razorpay Library -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById("payWithRazorpay").addEventListener("click", function () {
+    var options = {
+        key: "{{ razorpay_key }}", // Razorpay Key from Backend
+        amount: "{{ amount }}",
+        currency: "INR",
+        order_id: "{{ order_id }}",
+        handler: function (response) {
+            window.location.href = "{% url 'payment_success' booking.id %}";
+        },
+        prefill: {
+            email: "{{ request.user.email }}",
+            contact: "9999999999"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
+});
+</script>
+
+{% endblock %}

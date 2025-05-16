@@ -1,0 +1,133 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h2>📊 Admin Dashboard</h2>
+
+<!-- Top Metrics Section -->
+<div class="metrics-container">
+    <div class="metric-card revenue-card">
+        <h3>Total Revenue</h3>
+        <p>₹ {{ total_revenue }}</p>
+    </div>
+
+    <div class="metric-card popular-movie-card">
+        <h3>Most Popular Movie</h3>
+        <p>{{ most_popular_movie.name }} ({{ most_popular_movie.total_bookings }} bookings)</p>
+    </div>
+
+    <div class="metric-card busy-theater-card">
+        <h3>Busiest Theater</h3>
+        <p>{{ busiest_theater.name }} ({{ busiest_theater.total_bookings }} bookings)</p>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="dashboard-container">
+    <div class="dashboard-card chart-card">
+        <h3>Most Popular Movies (Bookings)</h3>
+        <canvas id="popularMoviesChart"></canvas>
+    </div>
+
+    <div class="dashboard-card chart-card">
+        <h3>Busiest Theaters (Bookings)</h3>
+        <canvas id="busiestTheatersChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Popular Movies Chart Data
+    const popularMoviesData = {
+        labels: [{% for movie in popular_movies %}"{{ movie.name }}",{% endfor %}],
+        datasets: [{
+            label: 'Bookings',
+            data: [{% for movie in popular_movies %}{{ movie.total_bookings }},{% endfor %}],
+            backgroundColor: '#36A2EB',
+            borderColor: '#1E88E5',
+            borderWidth: 2
+        }]
+    };
+
+    // Busiest Theaters Chart Data
+    const busiestTheatersData = {
+        labels: [{% for theater in busy_theaters %}"{{ theater.name }}",{% endfor %}],
+        datasets: [{
+            label: 'Bookings',
+            data: [{% for theater in busy_theaters %}{{ theater.total_bookings }},{% endfor %}],
+            backgroundColor: '#FF6384',
+            borderColor: '#E53935',
+            borderWidth: 2
+        }]
+    };
+
+    // Render Charts
+    const ctx1 = document.getElementById('popularMoviesChart').getContext('2d');
+    const ctx2 = document.getElementById('busiestTheatersChart').getContext('2d');
+
+    new Chart(ctx1, { type: 'bar', data: popularMoviesData });
+    new Chart(ctx2, { type: 'bar', data: busiestTheatersData });
+</script>
+
+<!-- Enhanced CSS for Modern Look -->
+<style>
+    .metrics-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #FF9800, #FFB74D);
+        color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        width: 30%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: scale(1.05);
+    }
+
+    .dashboard-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        background: #1E88E5;
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        width: 45%;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: scale(1.05);
+    }
+
+    .chart-card {
+        background: #36A2EB;
+    }
+
+    .metric-card h3,
+    .dashboard-card h3 {
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .metric-card p {
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+
+{% endblock %}
